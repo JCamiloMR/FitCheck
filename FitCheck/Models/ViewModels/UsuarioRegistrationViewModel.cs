@@ -5,7 +5,8 @@ namespace FitCheck.Models.ViewModels
     public class UsuarioRegistrationViewModel
     {
         [Required]
-        public int Cedula { get; set; }
+        [Range(10000, 9999999999, ErrorMessage = "La cédula debe tener entre 5 y 10 dígitos.")]
+        public long Cedula { get; set; }
 
         [Required]
         public string Email { get; set; } = null!;
@@ -18,6 +19,8 @@ namespace FitCheck.Models.ViewModels
         public string Contrasena { get; set; } = null!;
 
         [Required]
+        [Range(16, 100, ErrorMessage = "La edad debe ser entre 16 y 100 años.")]
+
         public int Edad { get; set; }
 
         [Required]

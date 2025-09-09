@@ -40,37 +40,45 @@ namespace FitCheck.Controllers
         }
 
         [HttpPost("Login")]
-        [ValidateAntiForgeryToken] 
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(UsuarioLoginViewModel model)
         {
-
             try
             {
                 if (!ModelState.IsValid) return View(model);
 
-                var user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == model.Email && u.Contrasena == model.Contrasena);
+                var user = await _context.Usuarios
+                    .FirstOrDefaultAsync(u => u.Email == model.Email.ToLower());
+
                 if (user == null)
                 {
                     ModelState.AddModelError(string.Empty, "Credenciales inválidas");
                     return View(model);
                 }
-                else
+
+                var hasher = new PasswordHasher<Usuario>();
+                var result = hasher.VerifyHashedPassword(user, user.Contrasena, model.Contrasena);
+
+                if (result == PasswordVerificationResult.Failed)
                 {
-                    var claims = new List<Claim>
+                    ModelState.AddModelError(string.Empty, "Credenciales inválidas");
+                    return View(model);
+                }
+
+                var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.Nombre),
                     new Claim(ClaimTypes.Email, user.Email),
                     new Claim(ClaimTypes.Role, user.Rol!)
                 };
 
-                    var identity = new ClaimsIdentity(claims, "Cookies");
-                    var principal = new ClaimsPrincipal(identity);
-                    await HttpContext.SignInAsync("Cookies", principal);
-                    return RedirectToAction("Index", "Home");
-                }
+                var identity = new ClaimsIdentity(claims, "Cookies");
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync("Cookies", principal);
 
+                return RedirectToAction("Index", "Home");
             }
-            catch(SqlException ex)
+            catch (SqlException)
             {
                 ModelState.AddModelError(string.Empty, "Error de conexión a la base de datos");
                 return View(model);
@@ -80,9 +88,8 @@ namespace FitCheck.Controllers
                 ModelState.AddModelError(string.Empty, "Error inesperado: " + ex.Message);
                 return View(model);
             }
-
-            
         }
+
 
 
 
