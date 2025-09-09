@@ -1,6 +1,7 @@
 ﻿using FitCheck.Models;
 using FitCheck.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,39 +25,36 @@ namespace FitCheck.Controllers
         }
 
         [HttpPost("Create")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(UsuarioRegistrationViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = new Usuario()
-                {
-                    Nombre = model.Nombre,
-                    Cedula = model.Cedula,
-                    Email = model.Email,
-                    Contrasena = model.Contrasena,
-                    Edad = model.Edad,
-                    Rol = model.Rol
-                };
-
-                if(await UserAlreadyExists(model.Cedula, model.Email))
-                {
-                    ModelState.AddModelError(string.Empty, "El usuario ya existe");
+        [ValidateAntiForgeryToken] 
+        public async Task<IActionResult> Create(UsuarioRegistrationViewModel model) 
+        { 
+            if (ModelState.IsValid) 
+            { 
+                var user = new Usuario() 
+                { 
+                    Nombre = model.Nombre, 
+                    Cedula = model.Cedula.ToString(),
+                    Email = model.Email, 
+                    Contrasena = model.Contrasena, 
+                    Edad = model.Edad, 
+                    Rol = model.Rol 
+                }; 
+                
+                if (await UserAlreadyExists(model.Cedula.ToString(), model.Email)) 
+                { 
+                    ModelState.AddModelError(string.Empty, "El usuario ya existe"); 
                     return View(model); 
-
-                }
-                else
-                {
-                    _context.Add(user);
+                } 
+                else 
+                { 
+                    _context.Add(user); 
                     await _context.SaveChangesAsync();
-
-                    return RedirectToAction("Index", "UserLogin");
-                }
-                  
-            }
-
-            return View(model);
-        }
+                    return RedirectToAction("Index", "UserLogin"); 
+                } 
+            } 
+            
+            
+            return View(model); }
 
         public async Task<bool> UserAlreadyExists(string cedula, string email)
         {

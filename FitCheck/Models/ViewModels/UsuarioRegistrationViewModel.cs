@@ -5,7 +5,7 @@ namespace FitCheck.Models.ViewModels
     public class UsuarioRegistrationViewModel
     {
         [Required]
-        public string Cedula { get; set; } = null!;
+        public int Cedula { get; set; }
 
         [Required]
         public string Email { get; set; } = null!;
@@ -21,7 +21,7 @@ namespace FitCheck.Models.ViewModels
         public int Edad { get; set; }
 
         [Required]
-        public string Rol { get; set; }
+        public string? Rol { get; set; }
 
     }
 }
